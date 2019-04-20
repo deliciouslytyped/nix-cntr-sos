@@ -65,8 +65,6 @@ let
             - 'exec nix-shell -E "(import ${builtins.toString ./test.nix} {}).shell {command=\"cntrGet\";}"'
     '';
 in {
-  inherit toDebug;
-
   shell = {command ? ""}: mkShell {
     name = "socat-cntr-tester";
     buildInputs = [ socat cntr' jdk11 tmux tmuxinator bashInteractive ]; #jdk provides jdb, a cli java debugger
@@ -77,8 +75,7 @@ in {
       export HISTFILE="${(builtins.toString ./.) + "/histfile"}"
 
       failBuild () {
-        #nix-build $ {toDebug.drvPath} #TODO causes it to be evaled for some reason so we have to return an attrset and do the other thing instead
-        nix-build -E "(import ${builtins.toString ./test.nix} {}).toDebug"
+        nix-build ${builtins.unsafeDiscardStringContext toDebug.drvPath}
         }
  
       reloadShell () {
